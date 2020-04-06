@@ -87,7 +87,7 @@ class HashTable:
         Fill this in.
         '''
 
-        def find(kv, key, prev=None):
+        def find(kv, key):
             if not kv:
                 print('key not found')
 
@@ -95,7 +95,7 @@ class HashTable:
                 kv.value = None
 
             else:
-                find(kv.next, key, kv)
+                find(kv.next, key)
 
         index = self._hash_mod(key)
 
