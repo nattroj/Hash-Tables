@@ -43,7 +43,7 @@ class HashTable:
         return self._hash(key) % self.capacity
 
 
-    def insert(self, key, value):
+    def insert(self, key, value, storage=None):
         '''
         Store the value with the given key.
 
@@ -54,9 +54,29 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
 
+        storage = storage if storage else self.storage
 
+        index = self._hash_mod(key)
+        kv = LinkedPair(key, value)
+
+        if storage[index] is not None:
+            '''
+            if there is already a linked list at this index,
+            traverse the list until you find the key or next is None
+            '''
+            current_pair = storage[index]
+
+            while current_pair.next and current_pair.key is not key:
+                current_pair = current_pair.next
+            
+            if current_pair.key is key:
+                current_pair.value = value
+            else:
+                current_pair.next = kv
+
+        else:
+            storage[index] = kv
 
     def remove(self, key):
         '''
@@ -66,7 +86,20 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+
+        def find(kv, key, prev=None):
+            if not kv:
+                print('key not found')
+
+            elif kv.key is key:
+                kv.value = None
+
+            else:
+                find(kv.next, key, kv)
+
+        index = self._hash_mod(key)
+
+        return find(self.storage[index], key)
 
 
     def retrieve(self, key):
@@ -77,8 +110,19 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        def find(kv,key):
+            if not kv:
+                return None
 
+            if kv.key is key:
+                return kv.value
+            
+            return find(kv.next, key)
+
+        index = self._hash_mod(key)
+
+        if self.storage[index] is not None:
+            return find(self.storage[index], key)
 
     def resize(self):
         '''
@@ -87,34 +131,71 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        self.capacity *= 2
+        new_storage = [None] * self.capacity
 
+        for slot in self.storage:
+            if not slot:
+                continue
+                
+            current_pair = slot
 
+            while current_pair:
+                self.insert(current_pair.key, current_pair.value, new_storage)
+                current_pair = current_pair.next
+        
+        self.storage = new_storage
 
 if __name__ == "__main__":
-    ht = HashTable(2)
+    # ht = HashTable(2)
 
-    ht.insert("line_1", "Tiny hash table")
-    ht.insert("line_2", "Filled beyond capacity")
-    ht.insert("line_3", "Linked list saves the day!")
+    # ht.insert("line_1", "Tiny hash table")
+    # ht.insert("line_2", "Filled beyond capacity")
+    # ht.insert("line_3", "Linked list saves the day!")
 
-    print("")
+    # print("")
 
-    # Test storing beyond capacity
-    print(ht.retrieve("line_1"))
-    print(ht.retrieve("line_2"))
-    print(ht.retrieve("line_3"))
+    # # Test storing beyond capacity
+    # print(ht.retrieve("line_1"))
+    # print(ht.retrieve("line_2"))
+    # print(ht.retrieve("line_3"))
 
-    # Test resizing
-    old_capacity = len(ht.storage)
-    ht.resize()
-    new_capacity = len(ht.storage)
+    # # Test resizing
+    # old_capacity = len(ht.storage)
+    # ht.resize()
+    # new_capacity = len(ht.storage)
 
-    print(f"\nResized from {old_capacity} to {new_capacity}.\n")
+    # print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
-    # Test if data intact after resizing
-    print(ht.retrieve("line_1"))
-    print(ht.retrieve("line_2"))
-    print(ht.retrieve("line_3"))
+    # # Test if data intact after resizing
+    # print(ht.retrieve("line_1"))
+    # print(ht.retrieve("line_2"))
+    # print(ht.retrieve("line_3"))
 
-    print("")
+    # print("")
+    ht = HashTable(8)
+
+    ht.insert("key-0", "val-0")
+    ht.insert("key-1", "val-1")
+    ht.insert("key-2", "val-2")
+    ht.insert("key-3", "val-3")
+    ht.insert("key-4", "val-4")
+    ht.insert("key-5", "val-5")
+    ht.insert("key-6", "val-6")
+    ht.insert("key-7", "val-7")
+    ht.insert("key-8", "val-8")
+    ht.insert("key-9", "val-9")
+
+    ht.remove("key-9")
+    ht.remove("key-8")
+    ht.remove("key-7")
+    ht.remove("key-6")
+    ht.remove("key-5")
+    ht.remove("key-4")
+    ht.remove("key-3")
+    ht.remove("key-2")
+    ht.remove("key-1")
+    ht.remove("key-0")
+
+    return_value = ht.retrieve("key-0")
+    print(return_value)
